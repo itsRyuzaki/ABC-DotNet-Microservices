@@ -1,0 +1,6 @@
+@ABC_Microservices.NET_HostAddress = http://localhost:5219
+
+GET {{ABC_Microservices.NET_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
