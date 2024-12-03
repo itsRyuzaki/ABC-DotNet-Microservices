@@ -6,10 +6,8 @@ namespace ABC.Users.Controllers;
 [Route("[controller]")]
 public class UsersController : ControllerBase
 {
-   
-
-    [HttpGet(Name = "GetHealth")]
-    public string Get()
+    [HttpGet("Health", Name = "GetHealth")]
+    public string GetHealthStatus()
     {
         return "Users microservice up and running!!";
     }
