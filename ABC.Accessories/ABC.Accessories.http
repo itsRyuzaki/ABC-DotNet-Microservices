@@ -1,0 +1,6 @@
+@ABC.Accessories_HostAddress = http://localhost:5173
+
+GET {{ABC.Accessories_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
