@@ -1,3 +1,4 @@
+using ABC.Users.DTO;
 using ABC.Users.Models;
 using ABC.Users.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +27,9 @@ public class UsersController : ControllerBase
         await _dbService.GetAsync();
 
     [HttpPost]
-    public async Task<IActionResult> Post(User userData)
+    public async Task<IActionResult> Post(UserSignUpDto userData)
     {
-        await _dbService.CreateAsync(userData);
+        await _dbService.AddUserAsync(userData);
 
         return Ok();
     }

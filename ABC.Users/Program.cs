@@ -1,3 +1,4 @@
+using ABC.Users.ABCMapper;
 using ABC.Users.Models;
 using ABC.Users.Services;
 
@@ -21,6 +22,7 @@ builder.Services.Configure<UsersDatabaseSettings>(
 */
 
 builder.Services.AddSingleton<MongoDbService>();
+builder.Services.AddAutoMapper(typeof(ABCMapper));
 
 // Post builder 
 var app = builder.Build();

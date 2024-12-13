@@ -9,6 +9,9 @@ public class User
     public string? Id { get; set; }
 
     [BsonRequired]
+    public required string UserName { get; set; }
+
+    [BsonRequired]
 
     public required string FirstName { get; set; }
 
@@ -28,7 +31,6 @@ public class User
 
     public DateTime UpdatedDate { get; set; }
 
-    public string? avatarUrl { get; set; }
-
+    public string? AvatarUrl { get; set; }
 
 }
