@@ -21,8 +21,9 @@ builder.Services.Configure<UsersDatabaseSettings>(
     Add Services to DI here 
 */
 
-builder.Services.AddSingleton<MongoDbService>();
 builder.Services.AddAutoMapper(typeof(ABCMapper));
+builder.Services.AddSingleton<IMongoDBService, MongoDbService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 
 // Post builder 
 var app = builder.Build();

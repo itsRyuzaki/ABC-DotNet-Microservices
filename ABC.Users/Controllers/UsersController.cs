@@ -1,5 +1,4 @@
 using ABC.Users.DTO;
-using ABC.Users.Models;
 using ABC.Users.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +8,11 @@ namespace ABC.Users.Controllers;
 [Route("[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly MongoDbService _dbService;
+    private readonly IUserService _userService;
 
-    public UsersController(MongoDbService dbService)
+    public UsersController(IUserService userService)
     {
-        _dbService = dbService;
+        _userService = userService;
     }
 
     [HttpGet("Health", Name = "GetHealth")]
@@ -22,14 +21,10 @@ public class UsersController : ControllerBase
         return "Users microservice up and running!!";
     }
 
-     [HttpGet]
-    public async Task<List<User>> Get() =>
-        await _dbService.GetAsync();
-
     [HttpPost]
     public async Task<IActionResult> Post(UserSignUpDto userData)
     {
-        await _dbService.AddUserAsync(userData);
+        await _userService.AddUserAsync(userData);
 
         return Ok();
     }

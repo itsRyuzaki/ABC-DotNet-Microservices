@@ -15,7 +15,7 @@ public class UserAuth
     public required string AuthHash { get; set; }
 
     [BsonRequired]
-    public required string[] Access { get; set; }
+    public required string[] AccessibleModules { get; set; }
 
     [BsonRequired]
     public required bool Active { get; set; }

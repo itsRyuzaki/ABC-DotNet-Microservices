@@ -4,8 +4,10 @@ using AutoMapper;
 
 namespace ABC.Users.ABCMapper;
 
-public class ABCMapper: Profile {
-    public ABCMapper() {
+public class ABCMapper : Profile
+{
+    public ABCMapper()
+    {
         CreateMap<UserSignUpDto, User>();
     }
 }

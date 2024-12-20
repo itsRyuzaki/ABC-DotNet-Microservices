@@ -1,26 +1,21 @@
-using ABC.Users.DTO;
 using ABC.Users.Models;
-using AutoMapper;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace ABC.Users.Services;
 
-public class MongoDbService
+public class MongoDbService : IMongoDBService
 {
     private readonly IMongoCollection<User> _userCollection;
     private readonly IMongoCollection<UserAuth> _userAuthCollection;
-    private readonly IMapper _mapper;
 
-
-    public MongoDbService(IOptions<UsersDatabaseSettings> settings, IMapper mapper)
+    public MongoDbService(IOptions<UsersDatabaseSettings> settings)
     {
         var mongoClient = new MongoClient(settings.Value.ConnectionString);
         var userDb = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
         _userCollection = userDb.GetCollection<User>("Users");
         _userAuthCollection = userDb.GetCollection<UserAuth>("UsersAuth");
-        _mapper = mapper;
 
         AddIndexToUserAuthCollection();
         AddIndexToUserCollection();
@@ -47,23 +42,13 @@ public class MongoDbService
         _userCollection.Indexes.CreateOne(indexModel);
     }
 
-    public async Task<List<User>> GetAsync() =>
-            await _userCollection.Find(_ => true).ToListAsync();
-    public async Task AddUserAsync(UserSignUpDto signUpRequest)
+    public IMongoCollection<User> GetUserCollection()
     {
-        var userData = _mapper.Map<User>(signUpRequest);
+        return _userCollection;
+    }
 
-        var authData = new UserAuth()
-        {
-            UserName = signUpRequest.UserName,
-            FirstName = signUpRequest.FirstName,
-            AuthHash = signUpRequest.Password,
-            Access = ["Emplyee"],
-            Active = true
-        };
-
-        await _userAuthCollection.InsertOneAsync(authData);
-
-        await _userCollection.InsertOneAsync(userData);
+    public IMongoCollection<UserAuth> GetUserAuthCollection()
+    {
+        return _userAuthCollection;
     }
 }
