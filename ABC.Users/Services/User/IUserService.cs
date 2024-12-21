@@ -4,5 +4,5 @@ namespace ABC.Users.Services;
 
 public interface IUserService
 {
-    public Task AddUserAsync(UserSignUpDto signUpRequest);
+    public Task<ApiResponseDto> AddUserAsync(UserSignUpDto signUpRequest);
 }

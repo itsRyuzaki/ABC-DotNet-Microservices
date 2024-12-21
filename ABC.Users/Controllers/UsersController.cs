@@ -1,4 +1,5 @@
 using ABC.Users.DTO;
+using ABC.Users.Enums;
 using ABC.Users.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,9 +25,21 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(UserSignUpDto userData)
     {
-        await _userService.AddUserAsync(userData);
+        var response = await _userService.AddUserAsync(userData);
 
-        return Ok();
+        if (response.ErrorDetails?.Code == (int)ResponseCode.DUPLICATE)
+        {
+
+            return Conflict(response);
+        }
+        else if (!response.Success)
+        {
+            return StatusCode(450, response);
+        }
+        else
+        {
+            return Ok(response);
+        }
     }
 
 }
