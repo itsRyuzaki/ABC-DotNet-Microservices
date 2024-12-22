@@ -1,4 +1,5 @@
 using ABC.Users.ABCMapper;
+using ABC.Users.Facade;
 using ABC.Users.Models;
 using ABC.Users.Services;
 
@@ -24,6 +25,8 @@ builder.Services.Configure<UsersDatabaseSettings>(
 builder.Services.AddAutoMapper(typeof(ABCMapper));
 builder.Services.AddSingleton<IMongoDBService, MongoDbService>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IUserFacade, UserFacade>();
+
 
 // Post builder 
 var app = builder.Build();

@@ -6,24 +6,15 @@ using MongoDB.Driver;
 
 namespace ABC.Users.Services;
 
-public class UserService(IMongoDBService mongoService, IMapper _mapper, ILogger<UserService> _logger) : IUserService
+public class UserService(IMongoDBService mongoService, ILogger<UserService> _logger) : IUserService
 {
     private readonly IMongoCollection<User> _userCollection = mongoService.GetUserCollection();
     private readonly IMongoCollection<UserAuth> _userAuthCollection = mongoService.GetUserAuthCollection();
 
-    public async Task<ApiResponseDto> AddUserAsync(UserSignUpDto signUpRequest)
+    // public async Task LoginUserAsync(UserLoginDto loginRequest){}
+
+    public async Task<ApiResponseDto> InsertUserDataAsync(User userData)
     {
-        var userData = _mapper.Map<User>(signUpRequest);
-
-        var authData = new UserAuth()
-        {
-            UserName = signUpRequest.UserName,
-            FirstName = signUpRequest.FirstName,
-            AuthHash = signUpRequest.Password,
-            AccessibleModules = ["Employee"],
-            Active = true
-        };
-
         try
         {
             await _userCollection.InsertOneAsync(userData);
@@ -34,8 +25,7 @@ public class UserService(IMongoDBService mongoService, IMapper _mapper, ILogger<
 
             if (error.WriteError.Code == (int)ResponseCode.DUPLICATE)
             {
-                return GetUserExistsError(error.WriteError.Code, ["User already exists in User Collection"]);
-
+                return HandleErrorResponse(error.WriteError.Code, ["User already exists in User Collection"]);
             }
 
             throw;
@@ -44,11 +34,18 @@ public class UserService(IMongoDBService mongoService, IMapper _mapper, ILogger<
         catch (Exception error)
         {
             _logger.LogError("Error while saving user details, error stack below: \n {ERROR} ", error.ToString());
-            return GetUserExistsError((int)ResponseCode.ERROR, ["Error while saving user data"]);
+            return HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving user data"]);
 
         }
 
+        return new ApiResponseDto()
+        {
+            Success = true,
+        };
+    }
 
+    public async Task<ApiResponseDto> InsertUserAuthDataAsync(UserAuth authData)
+    {
         try
         {
             await _userAuthCollection.InsertOneAsync(authData);
@@ -59,11 +56,10 @@ public class UserService(IMongoDBService mongoService, IMapper _mapper, ILogger<
 
             if (error.WriteError.Code == (int)ResponseCode.DUPLICATE)
             {
-                _logger.LogInformation("Deleting saved user data from User Collection");
-                await _userCollection.DeleteOneAsync(data => data.UserName == userData.UserName);
-                _logger.LogInformation("Successfully deleted saved user data from User Collection");
-                
-                return GetUserExistsError(error.WriteError.Code, ["User already exists in UserAuth Collection"]);
+                // Delete user data which is added to maintain consistency
+                await DeleteUserData(authData.UserName);
+
+                return HandleErrorResponse(error.WriteError.Code, ["User already exists in UserAuth Collection"]);
             }
 
             throw;
@@ -72,9 +68,11 @@ public class UserService(IMongoDBService mongoService, IMapper _mapper, ILogger<
         catch (Exception error)
         {
             _logger.LogError("Error while saving user details, error stack below: \n {ERROR} ", error.ToString());
-            await _userCollection.DeleteOneAsync(data => data.UserName == userData.UserName);
 
-            return GetUserExistsError((int)ResponseCode.ERROR, ["Error while saving user data"]);
+            // Delete user data which is added to maintain consistency
+            await DeleteUserData(authData.UserName);
+
+            return HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving user data"]);
 
         }
 
@@ -82,10 +80,21 @@ public class UserService(IMongoDBService mongoService, IMapper _mapper, ILogger<
         {
             Success = true,
         };
-
     }
 
-    private ApiResponseDto GetUserExistsError(int code, string[] details)
+    public async Task<UserAuth> GetUserAuthAsync(string userName){
+       var result = await _userAuthCollection.FindAsync(auth => auth.UserName == userName);
+        return result.FirstOrDefault();
+    }
+
+    private async Task DeleteUserData(string UserName)
+    {
+        _logger.LogInformation("Deleting saved user data from User Collection");
+        await _userCollection.DeleteOneAsync(data => data.UserName == UserName);
+        _logger.LogInformation("Successfully deleted saved user data from User Collection");
+    }
+
+    private ApiResponseDto HandleErrorResponse(int code, string[] details)
     {
         return new ApiResponseDto()
         {

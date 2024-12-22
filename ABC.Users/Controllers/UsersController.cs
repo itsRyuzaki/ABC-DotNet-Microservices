@@ -1,20 +1,14 @@
 using ABC.Users.DTO;
 using ABC.Users.Enums;
-using ABC.Users.Services;
+using ABC.Users.Facade;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABC.Users.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UsersController : ControllerBase
+public class UsersController(IUserFacade _userFacade) : ControllerBase
 {
-    private readonly IUserService _userService;
-
-    public UsersController(IUserService userService)
-    {
-        _userService = userService;
-    }
 
     [HttpGet("Health", Name = "GetHealth")]
     public string GetHealthStatus()
@@ -22,10 +16,10 @@ public class UsersController : ControllerBase
         return "Users microservice up and running!!";
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Post(UserSignUpDto userData)
+    [HttpPost("signup")]
+    public async Task<IActionResult> SignUpUser(UserSignUpDto userData)
     {
-        var response = await _userService.AddUserAsync(userData);
+        var response = await _userFacade.SignUpUserAsync(userData);
 
         if (response.ErrorDetails?.Code == (int)ResponseCode.DUPLICATE)
         {
@@ -40,6 +34,13 @@ public class UsersController : ControllerBase
         {
             return Ok(response);
         }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginUser(UserLoginDto loginRequest)
+    {
+        var response = await _userFacade.LoginUserAsync(loginRequest);
+        return response.Success ? Ok(): Unauthorized();
     }
 
 }

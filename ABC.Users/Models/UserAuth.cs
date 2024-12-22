@@ -1,9 +1,13 @@
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace ABC.Users.Models;
 
 public class UserAuth
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id {get; set;}
 
     [BsonRequired]
     public required string UserName { get; set; }
@@ -12,7 +16,9 @@ public class UserAuth
     public required string FirstName { get; set; }
 
     [BsonRequired]
-    public required string AuthHash { get; set; }
+    public required byte[] AuthHash { get; set; }
+    [BsonRequired]
+    public required string AuthSalt { get; set; }
 
     [BsonRequired]
     public required string[] AccessibleModules { get; set; }
