@@ -15,6 +15,9 @@ public class UserAuth
     [BsonRequired]
     public required string FirstName { get; set; }
 
+    public string? AvatarUrl { get; set; }
+
+
     [BsonRequired]
     public required byte[] AuthHash { get; set; }
     [BsonRequired]

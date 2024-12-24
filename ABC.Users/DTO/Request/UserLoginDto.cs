@@ -1,4 +1,4 @@
-namespace ABC.Users.DTO;
+namespace ABC.Users.DTO.Request;
 
 public class UserLoginDto {
     public required string UserName {get; set;}

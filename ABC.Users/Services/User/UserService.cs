@@ -1,4 +1,4 @@
-using ABC.Users.DTO;
+using ABC.Users.DTO.Response;
 using ABC.Users.Enums;
 using ABC.Users.Models;
 using AutoMapper;
@@ -10,6 +10,9 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
 {
     private readonly IMongoCollection<User> _userCollection = mongoService.GetUserCollection();
     private readonly IMongoCollection<UserAuth> _userAuthCollection = mongoService.GetUserAuthCollection();
+
+    private readonly IMongoCollection<SessionHistory> _sessionCollection = mongoService.GetSessionHistoryCollection();
+
 
     // public async Task LoginUserAsync(UserLoginDto loginRequest){}
 
@@ -25,7 +28,7 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
 
             if (error.WriteError.Code == (int)ResponseCode.DUPLICATE)
             {
-                return HandleErrorResponse(error.WriteError.Code, ["User already exists in User Collection"]);
+                return ApiResponseDto.HandleErrorResponse(error.WriteError.Code, ["User already exists in User Collection"]);
             }
 
             throw;
@@ -34,7 +37,7 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
         catch (Exception error)
         {
             _logger.LogError("Error while saving user details, error stack below: \n {ERROR} ", error.ToString());
-            return HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving user data"]);
+            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving user data"]);
 
         }
 
@@ -59,7 +62,7 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
                 // Delete user data which is added to maintain consistency
                 await DeleteUserData(authData.UserName);
 
-                return HandleErrorResponse(error.WriteError.Code, ["User already exists in UserAuth Collection"]);
+                return ApiResponseDto.HandleErrorResponse(error.WriteError.Code, ["User already exists in UserAuth Collection"]);
             }
 
             throw;
@@ -72,7 +75,7 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
             // Delete user data which is added to maintain consistency
             await DeleteUserData(authData.UserName);
 
-            return HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving user data"]);
+            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving user data"]);
 
         }
 
@@ -82,10 +85,67 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
         };
     }
 
-    public async Task<UserAuth> GetUserAuthAsync(string userName){
-       var result = await _userAuthCollection.FindAsync(auth => auth.UserName == userName);
-        return result.FirstOrDefault();
+    public async Task<UserAuth?> GetUserAuthAsync(string userName)
+    {
+        _logger.LogInformation("Fetching userAuth data for username: {username}", userName);
+
+        try
+        {
+            var result = await _userAuthCollection.FindAsync(auth => auth.UserName == userName);
+            _logger.LogInformation("Succesfully fetched userAuth data for username: {username}", userName);
+
+
+            return result.FirstOrDefault();
+
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                    "Error while fetching userAuth data for username: {username}, see error stack below:\n {error}",
+                    userName,
+                    error
+            );
+
+            return null;
+        }
     }
+
+    public async Task<string> GetSessionToken(string userName)
+    {
+        string sessionToken = Guid.NewGuid().ToString();
+
+        var filter = Builders<SessionHistory>.Filter;
+        var update = Builders<SessionHistory>.Update;
+
+        var combinedFilter = filter.Eq(session => session.UserName, userName)
+                        & filter.Gt(session => session.ExpiryDateTime, DateTime.UtcNow);
+
+
+        var result = await _sessionCollection.UpdateOneAsync(
+                            combinedFilter,
+                            update.Combine(
+                                update.Set(session => session.SessionToken, sessionToken),
+                                update.Set(session => session.CreatedDateTime, DateTime.UtcNow),
+                                update.Set(session => session.ExpiryDateTime, DateTime.UtcNow.AddMinutes(30))
+                            )
+                        );
+
+        if (result.ModifiedCount == 0)
+        {
+            await _sessionCollection.InsertOneAsync(new SessionHistory()
+            {
+                UserName = userName,
+                CreatedDateTime = DateTime.UtcNow,
+                ExpiryDateTime = DateTime.UtcNow.AddMinutes(30),
+                SessionToken = sessionToken
+            });
+        }
+
+        return sessionToken;
+
+    }
+
+
 
     private async Task DeleteUserData(string UserName)
     {
@@ -94,16 +154,5 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
         _logger.LogInformation("Successfully deleted saved user data from User Collection");
     }
 
-    private ApiResponseDto HandleErrorResponse(int code, string[] details)
-    {
-        return new ApiResponseDto()
-        {
-            Success = false,
-            ErrorDetails = new ErrorDetails()
-            {
-                Code = code,
-                Details = details
-            }
-        };
-    }
+
 }

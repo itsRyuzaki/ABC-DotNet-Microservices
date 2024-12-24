@@ -1,5 +1,6 @@
 using ABC.Users.ABCMapper;
 using ABC.Users.Facade;
+using ABC.Users.Middleware;
 using ABC.Users.Models;
 using ABC.Users.Services;
 
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+ 
 
 // for swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -16,7 +18,6 @@ builder.Services.AddSwaggerGen();
 // for db
 builder.Services.Configure<UsersDatabaseSettings>(
     builder.Configuration.GetSection("ABCUsersDatabase"));
-
 
 /** 
     Add Services to DI here 
@@ -44,6 +45,8 @@ else
 
 
 app.UseAuthorization();
+
+app.UseMiddleware<HttpSessionMiddleware>();
 
 app.MapControllers();
 

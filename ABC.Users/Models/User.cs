@@ -27,10 +27,9 @@ public class User
 
     public Address? UserAddress { get; set; }
 
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDateTime { get; set; }
 
-    public DateTime UpdatedDate { get; set; }
-
-    public string? AvatarUrl { get; set; }
+    public DateTime? UpdatedDateTime { get; set; }
+    public DateTime LastLoginDateTime { get; set; }
 
 }

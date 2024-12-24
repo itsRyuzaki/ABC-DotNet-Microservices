@@ -9,6 +9,9 @@ public class MongoDbService : IMongoDBService
     private readonly IMongoCollection<User> _userCollection;
     private readonly IMongoCollection<UserAuth> _userAuthCollection;
 
+    private readonly IMongoCollection<SessionHistory> _sessionCollection;
+
+
     public MongoDbService(IOptions<UsersDatabaseSettings> settings)
     {
         var mongoClient = new MongoClient(settings.Value.ConnectionString);
@@ -16,6 +19,8 @@ public class MongoDbService : IMongoDBService
 
         _userCollection = userDb.GetCollection<User>("Users");
         _userAuthCollection = userDb.GetCollection<UserAuth>("UsersAuth");
+        _sessionCollection = userDb.GetCollection<SessionHistory>("SessionHistory");
+
 
         AddIndexToUserAuthCollection();
         AddIndexToUserCollection();
@@ -50,5 +55,10 @@ public class MongoDbService : IMongoDBService
     public IMongoCollection<UserAuth> GetUserAuthCollection()
     {
         return _userAuthCollection;
+    }
+
+    public IMongoCollection<SessionHistory> GetSessionHistoryCollection()
+    {
+        return _sessionCollection;
     }
 }
