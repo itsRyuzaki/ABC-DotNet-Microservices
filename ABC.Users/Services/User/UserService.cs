@@ -6,7 +6,11 @@ using MongoDB.Driver;
 
 namespace ABC.Users.Services;
 
-public class UserService(IMongoDBService mongoService, ILogger<UserService> _logger) : IUserService
+public class UserService
+                (
+                    IMongoDBService mongoService,
+                    ILogger<UserService> _logger
+                ) : IUserService
 {
     private readonly IMongoCollection<User> _userCollection = mongoService.GetUserCollection();
     private readonly IMongoCollection<UserAuth> _userAuthCollection = mongoService.GetUserAuthCollection();
@@ -110,7 +114,7 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
         }
     }
 
-    public async Task<string> GetSessionToken(string userName)
+    public async Task<string?> GetAndSetSessionToken(string userName)
     {
         string sessionToken = Guid.NewGuid().ToString();
 
@@ -118,30 +122,44 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
         var update = Builders<SessionHistory>.Update;
 
         var combinedFilter = filter.Eq(session => session.UserName, userName)
-                        & filter.Gt(session => session.ExpiryDateTime, DateTime.UtcNow);
+                        & filter.Lt(session => session.ExpiryDateTime, DateTime.UtcNow);
 
 
-        var result = await _sessionCollection.UpdateOneAsync(
-                            combinedFilter,
-                            update.Combine(
-                                update.Set(session => session.SessionToken, sessionToken),
-                                update.Set(session => session.CreatedDateTime, DateTime.UtcNow),
-                                update.Set(session => session.ExpiryDateTime, DateTime.UtcNow.AddMinutes(30))
-                            )
-                        );
-
-        if (result.ModifiedCount == 0)
+        try
         {
-            await _sessionCollection.InsertOneAsync(new SessionHistory()
+            var result =
+                await _sessionCollection.UpdateOneAsync(
+                                            combinedFilter,
+                                            update.Combine(
+                                                update.Set(session => session.SessionToken, sessionToken),
+                                                update.Set(session => session.CreatedDateTime, DateTime.UtcNow),
+                                                update.Set(session => session.ExpiryDateTime, DateTime.UtcNow.AddMinutes(30))
+                                            )
+                                        );
+
+            if (result.ModifiedCount == 0)
             {
-                UserName = userName,
-                CreatedDateTime = DateTime.UtcNow,
-                ExpiryDateTime = DateTime.UtcNow.AddMinutes(30),
-                SessionToken = sessionToken
-            });
+                await _sessionCollection.InsertOneAsync(new SessionHistory()
+                {
+                    UserName = userName,
+                    CreatedDateTime = DateTime.UtcNow,
+                    ExpiryDateTime = DateTime.UtcNow.AddMinutes(30),
+                    SessionToken = sessionToken
+                });
+            }
+            return sessionToken;
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                "Error while creating session token for user: {username}. See Erro below:\n {error}",
+                userName,
+                error
+            );
+            return null;
         }
 
-        return sessionToken;
+
 
     }
 
@@ -154,5 +172,53 @@ public class UserService(IMongoDBService mongoService, ILogger<UserService> _log
         _logger.LogInformation("Successfully deleted saved user data from User Collection");
     }
 
+    public async Task<SessionHistory?> GetSessionHistoryFromToken(string sessionToken)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching session details from token: {token}", sessionToken[..6]);
 
+            var result = await _sessionCollection.FindAsync(
+                                                    session => session.SessionToken == sessionToken &&
+                                                    session.ExpiryDateTime > DateTime.UtcNow
+                                                );
+            _logger.LogInformation("Fetched session details successfully");
+
+            return result.FirstOrDefault();
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                "Error while fetching session details from token: {token}, see error satck below: \n {error}",
+                sessionToken[..6],
+                error
+            );
+            return null;
+        }
+    }
+
+    public async Task<User?> GetUserDetailsFromUserName(string userName)
+    {
+
+        try
+        {
+            _logger.LogInformation("Fetching user details for userName: {username}", userName);
+
+            var result = await _userCollection.FindAsync(user => user.UserName == userName);
+
+            _logger.LogInformation("Successfully fetched user details for userName: {username}", userName);
+
+            return result.FirstOrDefault();
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                "Error while fetching user details for user: {userName}, see error satck below: \n {error}",
+                userName,
+                error
+            );
+            return null;
+        }
+
+    }
 }

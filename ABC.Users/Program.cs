@@ -7,9 +7,22 @@ using ABC.Users.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
- 
+// Add Cors
+string origin = builder.Configuration.GetSection("AppSettings")
+                                    .GetValue<string>("AppOrigin") ?? "";
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy
+                .WithOrigins(origin)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 
 // for swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -43,6 +56,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseCors();
 
 app.UseAuthorization();
 

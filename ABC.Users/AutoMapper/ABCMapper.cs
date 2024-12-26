@@ -11,5 +11,7 @@ public class ABCMapper : Profile
     {
         CreateMap<UserSignUpDto, User>();
         CreateMap<ApiResponseDto, UserResponseDTO>();
+        CreateMap<User, UserResponseDTO>();
+
     }
 }

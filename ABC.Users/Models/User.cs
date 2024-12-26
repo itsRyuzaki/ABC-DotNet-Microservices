@@ -25,7 +25,15 @@ public class User
 
     public required string MobileNumber { get; set; }
 
+    public string? AvatarUrl { get; set; }
+
     public Address? UserAddress { get; set; }
+
+    [BsonRequired]
+    public required string[] AccessibleModules { get; set; }
+
+    [BsonRequired]
+    public required bool Active { get; set; }
 
     public DateTime CreatedDateTime { get; set; }
 

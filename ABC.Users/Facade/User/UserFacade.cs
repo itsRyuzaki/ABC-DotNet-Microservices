@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using ABC.Users.DTO.Request;
 using ABC.Users.DTO.Response;
@@ -10,7 +9,13 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace ABC.Users.Facade;
 
-public class UserFacade(IMapper _mapper, IUserService _userService, IConfiguration config, ILogger<UserFacade> _logger) : IUserFacade
+public class UserFacade
+            (
+                IMapper _mapper,
+                IUserService _userService,
+                IConfiguration config,
+                ILogger<UserFacade> _logger
+            ) : IUserFacade
 {
     public async Task<UserResponseDTO> LoginUserAsync(UserLoginDto loginRequest)
     {
@@ -19,7 +24,7 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
 
         if (result == null)
         {
-            _logger.LogInformation("No such user with username: {username} exists!", loginRequest.UserName);
+            _logger.LogInformation("No such user with username: {username} exists in userAuth!", loginRequest.UserName);
             return _mapper.Map<UserResponseDTO>(
                                     ApiResponseDto.HandleErrorResponse(
                                             (int)ResponseCode.NOT_FOUND,
@@ -35,13 +40,27 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
         if (validCreds)
         {
             _logger.LogInformation("Credentials matched for user");
-            return new UserResponseDTO()
+
+            var userDetails = await _userService.GetUserDetailsFromUserName(loginRequest.UserName);
+
+            if (userDetails == null)
             {
-                FirstName = result.FirstName,
-                AvatarUrl = result.AvatarUrl,
-                AccessibleModules = result.AccessibleModules,
-                Success = true,
-            };
+                _logger.LogInformation("No such user with username: {username} exists in User!", loginRequest.UserName);
+                return _mapper.Map<UserResponseDTO>(
+                                        ApiResponseDto.HandleErrorResponse(
+                                                (int)ResponseCode.NOT_FOUND,
+                                                ["No Such user exists"]
+                                            )
+                                        );
+            }
+            else
+            {
+                var response = _mapper.Map<UserResponseDTO>(userDetails);
+                response.Success = true;
+
+                return response;
+            }
+
         }
         else
         {
@@ -49,7 +68,7 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
 
             return _mapper.Map<UserResponseDTO>(
                                     ApiResponseDto.HandleErrorResponse(
-                                            (int)ResponseCode.BAD_REQUEST,
+                                            (int)ResponseCode.UNAUTHORIZED,
                                             ["Wrong username or password"]
                                         )
                                     );
@@ -62,6 +81,7 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
         userData.CreatedDateTime = DateTime.UtcNow;
         userData.UpdatedDateTime = null;
         userData.LastLoginDateTime = DateTime.UtcNow;
+        userData.AccessibleModules = ["Customer"];
 
         UserAuth authData = CreateUserAuthData(signUpRequest);
 
@@ -79,9 +99,9 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
         }
     }
 
-    public async Task<string> CreateSessionHistory(string userName)
+    public async Task<string?> CreateSessionHistoryAsync(string userName)
     {
-        return await _userService.GetSessionToken(userName);
+        return await _userService.GetAndSetSessionToken(userName);
     }
 
     private UserAuth CreateUserAuthData(UserSignUpDto signUpRequest)
@@ -91,11 +111,8 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
         return new UserAuth()
         {
             UserName = signUpRequest.UserName,
-            FirstName = signUpRequest.FirstName,
             AuthHash = CreateAuthHash(signUpRequest.Password, salt),
             AuthSalt = salt,
-            AccessibleModules = ["Customer"],
-            Active = true
         };
     }
 
@@ -108,5 +125,29 @@ public class UserFacade(IMapper _mapper, IUserService _userService, IConfigurati
             100,
             64
         );
+    }
+
+    public async Task<UserResponseDTO> GetUserDetailsFromSessionAsync(string sessionToken)
+    {
+        var sessionDetails = await _userService.GetSessionHistoryFromToken(sessionToken);
+
+
+        if (sessionDetails?.UserName != null)
+        {
+            var userDetails = await _userService.GetUserDetailsFromUserName(sessionDetails.UserName);
+            if (userDetails != null)
+            {
+                var response = _mapper.Map<UserResponseDTO>(userDetails);
+                response.Success = true;
+                return response;
+            }
+        }
+
+        return _mapper.Map<UserResponseDTO>(
+                        ApiResponseDto.HandleErrorResponse(
+                                (int)ResponseCode.UNAUTHORIZED,
+                                ["No saved credentials were found"]
+                            )
+                        );
     }
 }

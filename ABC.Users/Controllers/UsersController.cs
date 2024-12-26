@@ -1,4 +1,5 @@
 using ABC.Users.DTO.Request;
+using ABC.Users.DTO.Response;
 using ABC.Users.Enums;
 using ABC.Users.Facade;
 using Microsoft.AspNetCore.Mvc;
@@ -28,12 +29,24 @@ public class UsersController(IUserFacade _userFacade) : ControllerBase
         }
         else if (!response.Success)
         {
-            return StatusCode(450, response);
+            return StatusCode((int)ResponseCode.ERROR, response);
         }
         else
         {
-            await AddSessionCookie(userData.UserName);
-            return Ok(response);
+            bool sessionAdded = await AddSessionCookie(userData.UserName);
+            if (sessionAdded)
+                return Ok(response);
+            else
+            {
+                return StatusCode(
+                    (int)ResponseCode.ERROR,
+                    ApiResponseDto.HandleErrorResponse(
+                        (int)ResponseCode.ERROR,
+                        ["Error while setting session"]
+                    )
+                );
+            }
+
         }
     }
 
@@ -44,17 +57,50 @@ public class UsersController(IUserFacade _userFacade) : ControllerBase
 
         if (response.Success)
         {
-            await AddSessionCookie(loginRequest.UserName);
-            return Ok(response);
+            bool sessionAdded = await AddSessionCookie(loginRequest.UserName);
+            if (sessionAdded)
+                return Ok(response);
+            else
+            {
+                return StatusCode(
+                    (int)ResponseCode.ERROR,
+                    ApiResponseDto.HandleErrorResponse(
+                        (int)ResponseCode.ERROR,
+                        ["Error while setting session"]
+                    )
+                );
+            }
         }
 
 
-        return StatusCode(response.ErrorDetails?.Code ?? 401, response);
+        return StatusCode(response.ErrorDetails?.Code ?? (int)ResponseCode.UNAUTHORIZED, response);
     }
 
-    private async Task AddSessionCookie(string userName)
+    [HttpGet("validate")]
+    public async Task<IActionResult> ValidateCredentials()
     {
-        string token = await _userFacade.CreateSessionHistory(userName);
+        string? sessionToken = Request.Cookies["session_abc"];
+        if (!string.IsNullOrEmpty(sessionToken))
+        {
+            var result = await _userFacade.GetUserDetailsFromSessionAsync(sessionToken);
+            return result.Success ? Ok(result) : Unauthorized(result);
+        }
+
+        return Unauthorized(
+                    ApiResponseDto.HandleErrorResponse(
+                            (int)ResponseCode.UNAUTHORIZED,
+                            ["Session Token is empty"]
+                        )
+                    );
+    }
+    private async Task<bool> AddSessionCookie(string userName)
+    {
+        string? token = await _userFacade.CreateSessionHistoryAsync(userName);
+        if (token == null)
+        {
+            return false;
+        }
+
         Response.Cookies.Append("session_abc", token, new CookieOptions
         {
             Expires = DateTimeOffset.UtcNow.AddMinutes(30), // Expire in 30 mins
@@ -63,6 +109,7 @@ public class UsersController(IUserFacade _userFacade) : ControllerBase
             Secure = true, // Ensures the cookie is only sent over HTTPS
             SameSite = SameSiteMode.Strict // Restrict cookie sending to same-site requests
         });
+        return true;
     }
 
 }

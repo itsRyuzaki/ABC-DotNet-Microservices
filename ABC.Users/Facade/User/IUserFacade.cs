@@ -9,7 +9,9 @@ public interface IUserFacade {
 
     public Task<UserResponseDTO> LoginUserAsync(UserLoginDto loginRequest);
 
-    public Task<string> CreateSessionHistory(string userName);
+    public Task<string?> CreateSessionHistoryAsync(string userName);
+
+    public Task<UserResponseDTO> GetUserDetailsFromSessionAsync(string sessionToken);
 
 
 }
