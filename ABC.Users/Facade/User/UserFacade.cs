@@ -17,7 +17,7 @@ public class UserFacade
                 ILogger<UserFacade> _logger
             ) : IUserFacade
 {
-    public async Task<UserResponseDTO> LoginUserAsync(UserLoginDto loginRequest)
+    public async Task<ApiResponseDto<UserResponseDTO>> LoginUserAsync(UserLoginDto loginRequest)
     {
 
         var result = await _userService.GetUserAuthAsync(loginRequest.UserName);
@@ -25,12 +25,10 @@ public class UserFacade
         if (result == null)
         {
             _logger.LogInformation("No such user with username: {username} exists in userAuth!", loginRequest.UserName);
-            return _mapper.Map<UserResponseDTO>(
-                                    ApiResponseDto.HandleErrorResponse(
-                                            (int)ResponseCode.NOT_FOUND,
-                                            ["No Such user exists"]
-                                        )
-                                    );
+            return ApiResponseDto<UserResponseDTO>.HandleErrorResponse(
+                            (int)ResponseCode.NOT_FOUND,
+                            ["No Such user exists"]
+                        );
         }
 
         bool validCreds = result.AuthHash.SequenceEqual(
@@ -46,19 +44,15 @@ public class UserFacade
             if (userDetails == null)
             {
                 _logger.LogInformation("No such user with username: {username} exists in User!", loginRequest.UserName);
-                return _mapper.Map<UserResponseDTO>(
-                                        ApiResponseDto.HandleErrorResponse(
-                                                (int)ResponseCode.NOT_FOUND,
-                                                ["No Such user exists"]
-                                            )
-                                        );
+                return ApiResponseDto<UserResponseDTO>.HandleErrorResponse(
+                                (int)ResponseCode.NOT_FOUND,
+                                ["No Such user exists"]
+                            );
             }
             else
             {
-                var response = _mapper.Map<UserResponseDTO>(userDetails);
-                response.Success = true;
-
-                return response;
+                return ApiResponseDto<UserResponseDTO>
+                                .HandleSuccessResponse(_mapper.Map<UserResponseDTO>(userDetails));
             }
 
         }
@@ -66,16 +60,14 @@ public class UserFacade
         {
             _logger.LogInformation("Invalid Credentials provided for user login");
 
-            return _mapper.Map<UserResponseDTO>(
-                                    ApiResponseDto.HandleErrorResponse(
+            return ApiResponseDto<UserResponseDTO>.HandleErrorResponse(
                                             (int)ResponseCode.UNAUTHORIZED,
                                             ["Wrong username or password"]
-                                        )
-                                    );
+                                        );
         }
     }
 
-    public async Task<ApiResponseDto> SignUpUserAsync(UserSignUpDto signUpRequest)
+    public async Task<ApiResponseDto<string>> SignUpUserAsync(UserSignUpDto signUpRequest)
     {
         var userData = _mapper.Map<User>(signUpRequest);
         userData.CreatedDateTime = DateTime.UtcNow;
@@ -127,7 +119,7 @@ public class UserFacade
         );
     }
 
-    public async Task<UserResponseDTO> GetUserDetailsFromSessionAsync(string sessionToken)
+    public async Task<ApiResponseDto<UserResponseDTO>> GetUserDetailsFromSessionAsync(string sessionToken)
     {
         var sessionDetails = await _userService.GetSessionHistoryFromToken(sessionToken);
 
@@ -137,17 +129,14 @@ public class UserFacade
             var userDetails = await _userService.GetUserDetailsFromUserName(sessionDetails.UserName);
             if (userDetails != null)
             {
-                var response = _mapper.Map<UserResponseDTO>(userDetails);
-                response.Success = true;
-                return response;
+                return ApiResponseDto<UserResponseDTO>
+                                 .HandleSuccessResponse(_mapper.Map<UserResponseDTO>(userDetails));
             }
         }
 
-        return _mapper.Map<UserResponseDTO>(
-                        ApiResponseDto.HandleErrorResponse(
+        return ApiResponseDto<UserResponseDTO>.HandleErrorResponse(
                                 (int)ResponseCode.UNAUTHORIZED,
                                 ["No saved credentials were found"]
-                            )
-                        );
+                            );
     }
 }

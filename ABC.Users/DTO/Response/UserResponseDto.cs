@@ -1,6 +1,6 @@
 namespace ABC.Users.DTO.Response;
 
-public class UserResponseDTO : ApiResponseDto
+public class UserResponseDTO
 {
 
     public required string FirstName { get; set; }

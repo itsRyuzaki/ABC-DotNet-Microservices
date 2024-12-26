@@ -5,8 +5,8 @@ namespace ABC.Users.Services;
 
 public interface IUserService
 {
-    public Task<ApiResponseDto> InsertUserDataAsync(User userData);
-    public  Task<ApiResponseDto> InsertUserAuthDataAsync(UserAuth authData);
+    public Task<ApiResponseDto<string>> InsertUserDataAsync(User userData);
+    public  Task<ApiResponseDto<string>> InsertUserAuthDataAsync(UserAuth authData);
     public  Task<UserAuth?> GetUserAuthAsync(string userName);
     public  Task<string?> GetAndSetSessionToken(string userName);
 

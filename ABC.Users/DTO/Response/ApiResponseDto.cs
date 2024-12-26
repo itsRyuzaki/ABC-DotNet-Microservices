@@ -6,14 +6,15 @@ public class ErrorDetails
     public required int Code { get; set; }
     public string[] Details { get; set; } = [];
 }
-public class ApiResponseDto
+public class ApiResponseDto<T>
 {
+    public T? Data { get; set; }
     public bool Success { get; set; }
 
-    public ErrorDetails? ErrorDetails {get; set;}
-    public static ApiResponseDto HandleErrorResponse(int code, string[] details)
+    public ErrorDetails? ErrorDetails { get; set; }
+    public static ApiResponseDto<T> HandleErrorResponse(int code, string[] details)
     {
-        return new ApiResponseDto()
+        return new ApiResponseDto<T>()
         {
             Success = false,
             ErrorDetails = new ErrorDetails()
@@ -23,4 +24,19 @@ public class ApiResponseDto
             }
         };
     }
+
+    public static ApiResponseDto<T> HandleSuccessResponse(T data)
+    {
+        return new ApiResponseDto<T>()
+        {
+            Success = true,
+            Data = data
+        };
+    }
+}
+
+// fallback for not type
+public class ApiResponseDto : ApiResponseDto<string>
+{
+
 }

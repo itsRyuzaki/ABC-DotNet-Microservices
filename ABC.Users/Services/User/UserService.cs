@@ -1,7 +1,6 @@
 using ABC.Users.DTO.Response;
 using ABC.Users.Enums;
 using ABC.Users.Models;
-using AutoMapper;
 using MongoDB.Driver;
 
 namespace ABC.Users.Services;
@@ -20,7 +19,7 @@ public class UserService
 
     // public async Task LoginUserAsync(UserLoginDto loginRequest){}
 
-    public async Task<ApiResponseDto> InsertUserDataAsync(User userData)
+    public async Task<ApiResponseDto<string>> InsertUserDataAsync(User userData)
     {
         try
         {
@@ -51,7 +50,7 @@ public class UserService
         };
     }
 
-    public async Task<ApiResponseDto> InsertUserAuthDataAsync(UserAuth authData)
+    public async Task<ApiResponseDto<string>> InsertUserAuthDataAsync(UserAuth authData)
     {
         try
         {
