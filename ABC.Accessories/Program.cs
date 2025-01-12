@@ -11,12 +11,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // for db
-var conString = builder.Configuration.GetConnectionString("Accessories_Database") ??
-     throw new InvalidOperationException("Connection string 'Accessories_Database' not found.");
-     
-Console.WriteLine(conString);
+var mobileDbString = builder.Configuration.GetConnectionString("ABC_Mobiles_DB") ??
+                    throw new InvalidOperationException("Connection string 'ABC_Mobiles_DB' not found.");
 
-builder.Services.AddNpgsql<AccessoriesDataContext>(conString);
+var pcDbString = builder.Configuration.GetConnectionString("ABC_Computers_DB") ??
+                    throw new InvalidOperationException("Connection string 'ABC_Computers_DB' not found.");
+
+
+builder.Services.AddNpgsql<MobilesDataContext>(mobileDbString);
+builder.Services.AddNpgsql<ComputersDataContext>(pcDbString);
+
 
 var app = builder.Build();
 

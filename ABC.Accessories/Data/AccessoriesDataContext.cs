@@ -8,5 +8,10 @@ public class AccessoriesDataContext : DbContext
     {
     }
 
-    public DbSet<Accessory> Mobiles => Set<Accessory>();
+    public DbSet<Accessory> Accessories => Set<Accessory>();
+    public DbSet<Brand> Brands => Set<Brand>();
+    public DbSet<ItemImage> ItemImages => Set<ItemImage>();
+    public DbSet<Seller> Sellers => Set<Seller>();
+
+
 }
