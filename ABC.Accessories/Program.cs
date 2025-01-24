@@ -1,4 +1,7 @@
+using ABC.Accessories.AutoMapper;
 using ABC.Accessories.Data;
+using ABC.Accessories.Facade;
+using ABC.Accessories.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +23,13 @@ var pcDbString = builder.Configuration.GetConnectionString("ABC_Computers_DB") ?
 
 builder.Services.AddNpgsql<MobilesDataContext>(mobileDbString);
 builder.Services.AddNpgsql<ComputersDataContext>(pcDbString);
+
+// Services for DI
+
+builder.Services.AddAutoMapper(typeof(AccessoriesMapper));
+builder.Services.AddScoped<IAccessoriesService, AccessoriesService>();
+builder.Services.AddScoped<IAccessoriesFacade, AccessoriesFacade>();
+
 
 
 var app = builder.Build();

@@ -8,6 +8,6 @@ public class AccessoriesMapper : Profile
 {
     public AccessoriesMapper()
     {
-        CreateMap<AccessoryDetail, Accessory>();
+        CreateMap<AddAccessoriesDTO, Accessory>();
     }
 }

@@ -2,9 +2,10 @@ namespace ABC.Accessories.Enums;
 
 public enum ResponseCode
 {
+    SUCCESS_CREATED = 201,
+    BAD_REQUEST = 400,
+    UNAUTHORIZED = 401,
+    NOT_FOUND = 404,
     ERROR = 450,
     DUPLICATE = 11000,
-    NOT_FOUND = 404,
-    BAD_REQUEST = 400,
-    UNAUTHORIZED = 401
 }
