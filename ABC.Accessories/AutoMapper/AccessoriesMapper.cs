@@ -9,5 +9,7 @@ public class AccessoriesMapper : Profile
     public AccessoriesMapper()
     {
         CreateMap<AddAccessoriesDTO, Accessory>();
+        CreateMap<ItemImageDTO, ItemImage>();
+        CreateMap<AddSellerDTO, Seller>();
     }
 }

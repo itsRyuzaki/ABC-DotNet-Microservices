@@ -7,5 +7,8 @@ public interface IAccessoriesFacade
 {
 
     public Task<ApiResponseDto<string>> AddAccessoryDetailAsync(AddAccessoriesDTO requestPayload);
+    
+    public Task<ApiResponseDto<string>> AddSellerDetailsAsync(AddSellerDTO payload);
+
 
 }

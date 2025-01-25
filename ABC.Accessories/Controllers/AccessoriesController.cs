@@ -15,7 +15,7 @@ public class AccessoriesController(IAccessoriesFacade _accessoriesFacade) : Cont
         return "Accessories microservice up and running!!";
     }
 
-    [HttpPost("add")]
+    [HttpPost("add/accessory")]
     public async Task<IActionResult> AddAccessories(AddAccessoriesDTO payload)
     {
         var response = await _accessoriesFacade.AddAccessoryDetailAsync(payload);
@@ -26,5 +26,15 @@ public class AccessoriesController(IAccessoriesFacade _accessoriesFacade) : Cont
 
         return StatusCode(responseCode, response);
 
+    }
+
+    [HttpPost("add/seller")]
+    public async Task<IActionResult> AddSellers(AddSellerDTO payload)
+    {
+        var response = await _accessoriesFacade.AddSellerDetailsAsync(payload);
+        return StatusCode(
+                    (int)(response.Success ? ResponseCode.SUCCESS_CREATED : ResponseCode.ERROR),
+                    response
+                );
     }
 }
