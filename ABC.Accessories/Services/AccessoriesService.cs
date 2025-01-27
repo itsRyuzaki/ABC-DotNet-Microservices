@@ -25,26 +25,65 @@ public class AccessoriesService : IAccessoriesService
     }
 
 
-    public async Task<ApiResponseDto<string>> AddAccessoryAsync(Accessory accessory, string type)
+    public async Task<ApiResponseDto<string>> AddAccessoryAsync(
+                                                            Accessory accessory,
+                                                            string accessoryBaseId,
+                                                            string type
+                                                        )
     {
         try
         {
-            _contextMap[type].Accessories.Add(accessory);
-            await _contextMap[type].SaveChangesAsync();
+            var accessoryBaseDetail = await _contextMap[type].AccessoryBase
+                            .SingleOrDefaultAsync(x => x.AccessoryBaseId == accessoryBaseId);
 
-            _logger.LogInformation("Saved details for accessory: {name}", accessory.Name);
+            if (accessoryBaseDetail == null)
+            {
+                _logger.LogError("No base details found for baseId: {baseId}", accessoryBaseId);
+                throw new Exception("No base details found for baseId");
+            }
+            else
+            {
+                accessoryBaseDetail.Accessories.Add(accessory);
+                await _contextMap[type].SaveChangesAsync();
+                _logger.LogInformation("Saved details for accessory: {name}", accessoryBaseId);
+            }
+
         }
         catch (Exception error)
         {
             _logger.LogError(
                         "Error while saving details for accessory: {name}. See error stack below: \n {error}",
-                        accessory.Name,
+                        accessoryBaseId,
                         error.ToString()
                     );
             return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving accessory details."]);
         }
 
-        return ApiResponseDto.HandleSuccessResponse("Accessry Added!");
+        return ApiResponseDto.HandleSuccessResponse("Accessory Added!");
+
+    }
+
+    public async Task<ApiResponseDto<string>> AddAccessoryBaseAsync(AccessoryBase accessoryBase, string type)
+    {
+        try
+        {
+            _contextMap[type].AccessoryBase.Add(accessoryBase);
+            await _contextMap[type].SaveChangesAsync();
+
+            _logger.LogInformation("Saved base details for Accessory: {name}", accessoryBase.Name);
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                        "Error while saving base details for accessory: {name}. See error stack below: \n {error}",
+                        accessoryBase.Name,
+                        error.ToString()
+                    );
+
+            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving base details for accessory."]);
+        }
+
+        return ApiResponseDto.HandleSuccessResponse("Base Accessory Added");
 
     }
 

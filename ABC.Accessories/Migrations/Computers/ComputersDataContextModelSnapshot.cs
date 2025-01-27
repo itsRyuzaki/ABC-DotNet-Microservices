@@ -34,13 +34,8 @@ namespace ABC.Accessories.Migrations.Computers
                     b.Property<decimal>("AbcPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("AccessoryBaseId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -49,23 +44,53 @@ namespace ABC.Accessories.Migrations.Computers
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<decimal>("SellerPrice")
                         .HasColumnType("numeric");
-
-                    b.Property<string>("SubCategory")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccessoryBaseId");
+
                     b.ToTable("Accessories", "abc");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.AccessoryBase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessoryBaseId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubCategory")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessoryBaseId")
+                        .IsUnique();
+
+                    b.ToTable("AccessoryBase", "abc");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Brand", b =>
@@ -112,6 +137,31 @@ namespace ABC.Accessories.Migrations.Computers
                     b.HasKey("Id");
 
                     b.ToTable("Category", "abc");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.Inventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccessoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AvailableCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalSold")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessoryId")
+                        .IsUnique();
+
+                    b.ToTable("Inventory", "abc");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.ItemImage", b =>
@@ -183,6 +233,28 @@ namespace ABC.Accessories.Migrations.Computers
                     b.ToTable("AccessorySellerXREF", "abc");
                 });
 
+            modelBuilder.Entity("ABC.Accessories.Models.Accessory", b =>
+                {
+                    b.HasOne("ABC.Accessories.Models.AccessoryBase", "AccessoryBase")
+                        .WithMany("Accessories")
+                        .HasForeignKey("AccessoryBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccessoryBase");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.Inventory", b =>
+                {
+                    b.HasOne("ABC.Accessories.Models.Accessory", "Accessory")
+                        .WithOne("Inventory")
+                        .HasForeignKey("ABC.Accessories.Models.Inventory", "AccessoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accessory");
+                });
+
             modelBuilder.Entity("ABC.Accessories.Models.ItemImage", b =>
                 {
                     b.HasOne("ABC.Accessories.Models.Accessory", "Accessory")
@@ -212,6 +284,14 @@ namespace ABC.Accessories.Migrations.Computers
             modelBuilder.Entity("ABC.Accessories.Models.Accessory", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("Inventory")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.AccessoryBase", b =>
+                {
+                    b.Navigation("Accessories");
                 });
 #pragma warning restore 612, 618
         }

@@ -13,11 +13,11 @@ public class AccessoriesFacade(
                     ILogger<AccessoriesFacade> _logger
                 ) : IAccessoriesFacade
 {
-    public async Task<ApiResponseDto<string>> AddAccessoryDetailAsync(AddAccessoriesDTO payload)
+    public async Task<ApiResponseDto<string>> AddAccessoryDetailAsync(AddAccessoryDTO payload)
     {
         var accessoryDetail = _mapper.Map<Accessory>(payload);
 
-        _logger.LogInformation("Fetching Seller Details for accessory: {name}", accessoryDetail.Name);
+        _logger.LogInformation("Fetching Seller Details for accessory: {name}", payload.AccessoryBaseId);
 
         // get seller details from seller ids
         var sellers = await _accessoriesService
@@ -27,19 +27,30 @@ public class AccessoriesFacade(
         if (sellers != null && sellers.Count != 0)
         {
             accessoryDetail.Sellers = sellers;
+            accessoryDetail.Inventory = new Inventory()
+            {
+                AvailableCount = payload.AvailableCount,
+                TotalSold = 0
+            };
+
             accessoryDetail.CreatedDate = DateTime.UtcNow;
             accessoryDetail.UpdatedDate = DateTime.UtcNow;
 
-            _logger.LogInformation("Saving Accessory Details for accessory: {name}", accessoryDetail.Name);
+            _logger.LogInformation("Saving Accessory Details for accessory: {name}", payload.AccessoryBaseId);
 
             return await _accessoriesService
-                                 .AddAccessoryAsync(accessoryDetail, payload.Type);
+                                 .AddAccessoryAsync(accessoryDetail, payload.AccessoryBaseId, payload.Type);
         }
         else
         {
-            _logger.LogError("Invalid SellerIds fro accessory: {name}", accessoryDetail.Name);
+            _logger.LogError("Invalid SellerIds for accessory: {name}", payload.AccessoryBaseId);
             return ApiResponseDto.HandleErrorResponse((int)ResponseCode.BAD_REQUEST, ["Invalid SellerIds"]);
         }
+    }
+
+    public async Task<ApiResponseDto<string>> AddAccessoryBaseDetailAsync(AddAccessoryBaseDTO payload)
+    {
+        return await _accessoriesService.AddAccessoryBaseAsync(_mapper.Map<AccessoryBase>(payload), payload.Type);
     }
 
     public async Task<ApiResponseDto<string>> AddSellerDetailsAsync(AddSellerDTO payload)

@@ -12,13 +12,13 @@ public class ItemImageDTO
     public required string Source { get; set; }
 }
 
-public class AddAccessoriesDTO
+public class AddAccessoryDTO
 {
     [Required]
     public required string Type { get; set; }
 
     [Required]
-    public required string Name { get; set; }
+    public required string AccessoryBaseId {get; set;}
 
     [Required]
     [MinLength(1)]
@@ -43,11 +43,6 @@ public class AddAccessoriesDTO
     public Decimal AbcPrice { get; set; }
 
     [Required]
-    public required string Category { get; set; }
+    public int AvailableCount { get; set; }
 
-    [Required]
-    public required string SubCategory { get; set; }
-
-    [Required]
-    public required string Brand { get; set; }
 }
