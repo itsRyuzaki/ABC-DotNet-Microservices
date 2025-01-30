@@ -50,7 +50,11 @@ public class AccessoriesFacade(
 
     public async Task<ApiResponseDto<string>> AddAccessoryBaseDetailAsync(AddAccessoryBaseDTO payload)
     {
-        return await _accessoriesService.AddAccessoryBaseAsync(_mapper.Map<AccessoryBase>(payload), payload.Type);
+        var details = _mapper.Map<AccessoryBase>(payload);
+
+        details.AccessoryBaseId = Guid.NewGuid().ToString();
+
+        return await _accessoriesService.AddAccessoryBaseAsync(details, payload.Type);
     }
 
     public async Task<ApiResponseDto<string>> AddSellerDetailsAsync(AddSellerDTO payload)

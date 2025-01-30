@@ -39,7 +39,7 @@ public class AccessoriesService : IAccessoriesService
             if (accessoryBaseDetail == null)
             {
                 _logger.LogError("No base details found for baseId: {baseId}", accessoryBaseId);
-                throw new Exception("No base details found for baseId");
+                throw new Exception($"No base details found for baseId: {accessoryBaseId}" );
             }
             else
             {
