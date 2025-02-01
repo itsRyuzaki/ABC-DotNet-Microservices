@@ -37,6 +37,12 @@ public class AccessoriesController(IAccessoriesFacade _accessoriesFacade) : Cont
 
     }
 
+    [HttpPost("add/accessory/images")]
+    public async Task<IActionResult> AddAccessoryImage(List<IFormFile> images, string type, string accessoryGuid){
+        await _accessoriesFacade.AddAccessoryImageAsync(images, type, accessoryGuid);        
+        return Ok();
+    } 
+
     [HttpPost("add/seller")]
     public async Task<IActionResult> AddSeller(AddSellerDTO payload)
     {

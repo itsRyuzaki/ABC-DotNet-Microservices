@@ -59,7 +59,7 @@ public class AccessoriesService : IAccessoriesService
             return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving accessory details."]);
         }
 
-        return ApiResponseDto.HandleSuccessResponse("Accessory Added!");
+        return ApiResponseDto.HandleSuccessResponse(accessory.AccessoryGuid);
 
     }
 

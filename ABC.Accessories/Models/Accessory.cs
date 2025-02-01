@@ -15,6 +15,9 @@ public class Accessory
     public List<ItemImage> Images { get; set; } = [];
 
     [Required]
+    public required string AccessoryGuid { get; set; }
+
+    [Required]
     public required string Description { get; set; }
 
     [Required]

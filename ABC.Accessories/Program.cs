@@ -2,6 +2,7 @@ using ABC.Accessories.AutoMapper;
 using ABC.Accessories.Data;
 using ABC.Accessories.Facade;
 using ABC.Accessories.Services;
+using ABC.Accessories.Services.Blob;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services.AddNpgsql<ComputersDataContext>(pcDbString);
 // Services for DI
 
 builder.Services.AddAutoMapper(typeof(AccessoriesMapper));
+builder.Services.AddSingleton<IBlobService,BlobService>();
 builder.Services.AddScoped<IAccessoriesService, AccessoriesService>();
 builder.Services.AddScoped<IAccessoriesFacade, AccessoriesFacade>();
 
