@@ -17,7 +17,7 @@ namespace ABC.Accessories.Migrations.Mobiles
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("abc")
+                .HasDefaultSchema("abc-mobiles")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -37,6 +37,10 @@ namespace ABC.Accessories.Migrations.Mobiles
                     b.Property<int>("AccessoryBaseId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("AccessoryGuid")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -54,7 +58,10 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasIndex("AccessoryBaseId");
 
-                    b.ToTable("Accessories", "abc");
+                    b.HasIndex("AccessoryGuid")
+                        .IsUnique();
+
+                    b.ToTable("Accessories", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.AccessoryBase", b =>
@@ -90,7 +97,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     b.HasIndex("AccessoryBaseId")
                         .IsUnique();
 
-                    b.ToTable("AccessoryBase", "abc");
+                    b.ToTable("AccessoryBase", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Brand", b =>
@@ -111,7 +118,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", "abc");
+                    b.ToTable("Brands", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Category", b =>
@@ -136,7 +143,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category", "abc");
+                    b.ToTable("Category", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Inventory", b =>
@@ -161,7 +168,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     b.HasIndex("AccessoryId")
                         .IsUnique();
 
-                    b.ToTable("Inventory", "abc");
+                    b.ToTable("Inventory", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.ItemImage", b =>
@@ -179,6 +186,9 @@ namespace ABC.Accessories.Migrations.Mobiles
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasColumnType("text");
@@ -187,7 +197,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasIndex("AccessoryId");
 
-                    b.ToTable("ItemImages", "abc");
+                    b.ToTable("ItemImages", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Seller", b =>
@@ -215,7 +225,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sellers", "abc");
+                    b.ToTable("Sellers", "abc-mobiles");
                 });
 
             modelBuilder.Entity("AccessorySellerXREF", b =>
@@ -230,7 +240,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasIndex("SellersId");
 
-                    b.ToTable("AccessorySellerXREF", "abc");
+                    b.ToTable("AccessorySellerXREF", "abc-mobiles");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Accessory", b =>

@@ -13,11 +13,11 @@ namespace ABC.Accessories.Migrations.Mobiles
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "abc");
+                name: "abc-mobiles");
 
             migrationBuilder.CreateTable(
                 name: "AccessoryBase",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -35,7 +35,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "Brands",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -50,7 +50,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "Category",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -66,7 +66,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "Sellers",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -83,12 +83,13 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "Accessories",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AccessoryBaseId = table.Column<int>(type: "integer", nullable: false),
+                    AccessoryGuid = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     SellerPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     AbcPrice = table.Column<decimal>(type: "numeric", nullable: false),
@@ -101,7 +102,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     table.ForeignKey(
                         name: "FK_Accessories_AccessoryBase_AccessoryBaseId",
                         column: x => x.AccessoryBaseId,
-                        principalSchema: "abc",
+                        principalSchema: "abc-mobiles",
                         principalTable: "AccessoryBase",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -109,7 +110,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "AccessorySellerXREF",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     AccessoriesId = table.Column<int>(type: "integer", nullable: false),
@@ -121,14 +122,14 @@ namespace ABC.Accessories.Migrations.Mobiles
                     table.ForeignKey(
                         name: "FK_AccessorySellerXREF_Accessories_AccessoriesId",
                         column: x => x.AccessoriesId,
-                        principalSchema: "abc",
+                        principalSchema: "abc-mobiles",
                         principalTable: "Accessories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AccessorySellerXREF_Sellers_SellersId",
                         column: x => x.SellersId,
-                        principalSchema: "abc",
+                        principalSchema: "abc-mobiles",
                         principalTable: "Sellers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -136,7 +137,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "Inventory",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -151,7 +152,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     table.ForeignKey(
                         name: "FK_Inventory_Accessories_AccessoryId",
                         column: x => x.AccessoryId,
-                        principalSchema: "abc",
+                        principalSchema: "abc-mobiles",
                         principalTable: "Accessories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -159,14 +160,15 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateTable(
                 name: "ItemImages",
-                schema: "abc",
+                schema: "abc-mobiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AccessoryId = table.Column<int>(type: "integer", nullable: false),
                     AltText = table.Column<string>(type: "text", nullable: false),
-                    Source = table.Column<string>(type: "text", nullable: false)
+                    Source = table.Column<string>(type: "text", nullable: false),
+                    Order = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -174,7 +176,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     table.ForeignKey(
                         name: "FK_ItemImages_Accessories_AccessoryId",
                         column: x => x.AccessoryId,
-                        principalSchema: "abc",
+                        principalSchema: "abc-mobiles",
                         principalTable: "Accessories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -182,33 +184,40 @@ namespace ABC.Accessories.Migrations.Mobiles
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accessories_AccessoryBaseId",
-                schema: "abc",
+                schema: "abc-mobiles",
                 table: "Accessories",
                 column: "AccessoryBaseId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Accessories_AccessoryGuid",
+                schema: "abc-mobiles",
+                table: "Accessories",
+                column: "AccessoryGuid",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AccessoryBase_AccessoryBaseId",
-                schema: "abc",
+                schema: "abc-mobiles",
                 table: "AccessoryBase",
                 column: "AccessoryBaseId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AccessorySellerXREF_SellersId",
-                schema: "abc",
+                schema: "abc-mobiles",
                 table: "AccessorySellerXREF",
                 column: "SellersId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inventory_AccessoryId",
-                schema: "abc",
+                schema: "abc-mobiles",
                 table: "Inventory",
                 column: "AccessoryId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItemImages_AccessoryId",
-                schema: "abc",
+                schema: "abc-mobiles",
                 table: "ItemImages",
                 column: "AccessoryId");
         }
@@ -218,35 +227,35 @@ namespace ABC.Accessories.Migrations.Mobiles
         {
             migrationBuilder.DropTable(
                 name: "AccessorySellerXREF",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "Brands",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "Category",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "Inventory",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "ItemImages",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "Sellers",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "Accessories",
-                schema: "abc");
+                schema: "abc-mobiles");
 
             migrationBuilder.DropTable(
                 name: "AccessoryBase",
-                schema: "abc");
+                schema: "abc-mobiles");
         }
     }
 }
