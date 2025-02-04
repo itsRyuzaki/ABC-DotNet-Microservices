@@ -39,7 +39,7 @@ public class AccessoriesService : IAccessoriesService
             if (accessoryBaseDetail == null)
             {
                 _logger.LogError("No base details found for baseId: {baseId}", accessoryBaseId);
-                throw new Exception($"No base details found for baseId: {accessoryBaseId}" );
+                throw new Exception($"No base details found for baseId: {accessoryBaseId}");
             }
             else
             {
@@ -71,6 +71,8 @@ public class AccessoriesService : IAccessoriesService
             await _contextMap[type].SaveChangesAsync();
 
             _logger.LogInformation("Saved base details for Accessory: {name}", accessoryBase.Name);
+            return ApiResponseDto.HandleSuccessResponse("Base Accessory Added");
+
         }
         catch (Exception error)
         {
@@ -83,10 +85,8 @@ public class AccessoriesService : IAccessoriesService
             return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving base details for accessory."]);
         }
 
-        return ApiResponseDto.HandleSuccessResponse("Base Accessory Added");
 
     }
-
 
     public async Task<ApiResponseDto<string>> AddSellerAsync(Seller seller, string type)
     {
@@ -97,6 +97,8 @@ public class AccessoriesService : IAccessoriesService
             await _contextMap[type].SaveChangesAsync();
 
             _logger.LogInformation("Saved details for seller: {name}", seller.Name);
+            return ApiResponseDto.HandleSuccessResponse("Seller Added");
+
         }
         catch (Exception error)
         {
@@ -109,18 +111,65 @@ public class AccessoriesService : IAccessoriesService
             return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving seller details."]);
         }
 
-        return ApiResponseDto.HandleSuccessResponse("Seller Added");
 
     }
 
     public async Task<List<Seller>> GetSellersAsync(int[] sellerIds, string type)
     {
-        return await _contextMap[type].Sellers
-                                        .Where(seller => sellerIds.Contains(seller.Id))
-                                        .ToListAsync();
+        try
+        {
+            _logger.LogInformation("Fetching seller details...");
+
+            return await _contextMap[type].Sellers
+                                            .Where(seller => sellerIds.Contains(seller.Id))
+                                            .ToListAsync();
+        }
+        catch (Exception error)
+        {
+            _logger.LogError("Error while fetching seller details. See error stack below: \n {error}", error.ToString());
+            return [];
+        }
     }
 
+    public async Task<Accessory?> GetAccessoryFromGuidAsync(string accessoryGuid, string type)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching Accessory details from Guid: {guid}", accessoryGuid);
 
+            return await _contextMap[type].Accessories
+                                             .FirstOrDefaultAsync(x => x.AccessoryGuid == accessoryGuid);
 
+        }
+        catch (Exception error)
+        {
+            _logger.LogError("Error while fetching Accessory details from Guid: {guid}. See error stack below: \n {error}", accessoryGuid, error.ToString());
+            return null;
+        }
+    }
+
+    public async Task<ApiResponseDto<string>> AddImagesToAccessoryAsync(List<ItemImage> itemImages, Accessory accessory, string type)
+    {
+        try
+        {
+            accessory.Images.AddRange(itemImages);
+            await _contextMap[type].SaveChangesAsync();
+
+            _logger.LogInformation("Saved images for Accessory: {guid}", accessory.AccessoryGuid);
+            return ApiResponseDto.HandleSuccessResponse("Added Images to Accessory Details");
+
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                        "Error while saving images for accessory: {guid}. See error stack below: \n {error}",
+                        accessory.AccessoryGuid,
+                        error.ToString()
+                    );
+
+            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving images for accessory."]);
+        }
+
+    }
 
 }

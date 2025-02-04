@@ -25,7 +25,7 @@ public class ApiResponseDto<T>
         };
     }
 
-    public static ApiResponseDto<T> HandleSuccessResponse(T data)
+    public static ApiResponseDto<T> HandleSuccessResponse(T? data)
     {
         return new ApiResponseDto<T>()
         {
@@ -35,7 +35,7 @@ public class ApiResponseDto<T>
     }
 }
 
-// fallback for not type
+// fallback for no type
 public class ApiResponseDto : ApiResponseDto<string>
 {
 

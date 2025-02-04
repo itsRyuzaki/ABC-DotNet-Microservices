@@ -1,7 +1,8 @@
-using System.Text.RegularExpressions;
+using ABC.Accessories.Constants;
 using ABC.Accessories.DTO.Request;
 using ABC.Accessories.DTO.Response;
 using ABC.Accessories.Enums;
+using ABC.Accessories.Helpers;
 using ABC.Accessories.Models;
 using ABC.Accessories.Services;
 using ABC.Accessories.Services.Blob;
@@ -13,6 +14,7 @@ public class AccessoriesFacade(
                     IMapper _mapper,
                     IAccessoriesService _accessoriesService,
                     IBlobService _blobService,
+                    IAccessoriesHelper _accessoriesHelper,
                     ILogger<AccessoriesFacade> _logger
                 ) : IAccessoriesFacade
 {
@@ -67,21 +69,88 @@ public class AccessoriesFacade(
         return await _accessoriesService.AddSellerAsync(_mapper.Map<Seller>(payload), payload.Type);
     }
 
-    public async Task<ApiResponseDto<string>> AddAccessoryImageAsync(List<IFormFile> images, string type, string accessoryGuid)
+    public async Task<ApiResponseDto<List<bool>>> AddAccessoryImagesAsync(List<IFormFile> images, IFormFile requestPayload)
     {
+        var deserializedResponse = await _accessoriesHelper
+                                                .DeserializeJsonFromFileAsync<AddAccessoryImagesDTO>(requestPayload);
 
-        await Parallel.ForEachAsync(images, async (image, CancellationToken) =>
+        if (!deserializedResponse.Success || deserializedResponse.Data == null)
         {
-            await _blobService.Upload(type, $"item-images/{accessoryGuid}/{SanitizeBlobName(image.FileName)}", image);
-        });
+            return new ApiResponseDto<List<bool>>()
+            {
+                Success = false,
+                ErrorDetails = deserializedResponse.ErrorDetails
+            };
+        }
 
-        return ApiResponseDto.HandleSuccessResponse("");
+        var itemImagesPayload = deserializedResponse.Data;
+        var type = itemImagesPayload.Type;
+        var accessoryGuid = itemImagesPayload.AccessoryGuid;
+
+        var accessory = await _accessoriesService.GetAccessoryFromGuidAsync(accessoryGuid, type);
+
+        if (accessory == null)
+        {
+            return ApiResponseDto<List<bool>>.HandleErrorResponse(
+                                            (int)ResponseCode.BAD_REQUEST,
+                                            ["No Accessory details found for given guid"]
+                                        );
+        }
+
+
+        for (int i = 0; i < itemImagesPayload.ItemImages.Count; i++)
+        {
+            itemImagesPayload.ItemImages[i].File = images[i];
+
+        }
+
+        return await SaveImagesToBlobAndDbAsync(itemImagesPayload, type, accessory);
 
     }
 
-    public string SanitizeBlobName(string fileName)
+    private async Task<ApiResponseDto<List<bool>>> SaveImagesToBlobAndDbAsync(AddAccessoryImagesDTO itemImagesPayload, string type, Accessory accessory)
     {
-        // Regex to replace any character that is not a-z, 0-9, or hyphen with a hyphen
-        return Regex.Replace(fileName.ToLower(), @"[^a-z0-9\-]", "-");
+        List<bool> fileSavedResponse = [];
+        List<ItemImage> savedItemImages = [];
+
+
+        await Parallel.ForEachAsync(
+                itemImagesPayload.ItemImages,
+                new ParallelOptions { MaxDegreeOfParallelism = 5 },
+                async (itemImageDTO, CancellationToken) =>
+                {
+                    var fileName = _accessoriesHelper.SanitizeBlobName(itemImageDTO.File.FileName);
+                    var filePath = $"{BlobPath.ItemImages}/{accessory.AccessoryGuid}/{fileName}";
+
+                    var fileSaved = await _blobService.Upload(
+                                            type.ToLower(),
+                                            filePath,
+                                            itemImageDTO.File
+                                        );
+                    if (fileSaved)
+                    {
+                        var itemImage = _mapper.Map<ItemImage>(itemImageDTO);
+                        itemImage.Source = filePath;
+                        savedItemImages.Add(itemImage);
+
+                    }
+                    fileSavedResponse.Add(fileSaved);
+                });
+
+
+        if (savedItemImages.Count != 0)
+        {
+            var savedResponse = await _accessoriesService.AddImagesToAccessoryAsync(savedItemImages, accessory, type);
+            if (savedResponse.Success)
+            {
+                return ApiResponseDto<List<bool>>.HandleSuccessResponse(fileSavedResponse);
+            }
+        }
+
+
+        return ApiResponseDto<List<bool>>.HandleErrorResponse(
+                                                            (int)ResponseCode.ERROR,
+                                                            ["Error while saving images"]
+                                                        );
     }
 }

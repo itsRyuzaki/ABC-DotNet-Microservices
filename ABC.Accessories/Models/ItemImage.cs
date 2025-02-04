@@ -6,7 +6,7 @@ public class ItemImage
 {
     public int Id { get; set; }
 
-    public int AccessoryId {get; set;}
+    public int AccessoryId { get; set; }
 
     public Accessory Accessory { get; set; } = null!;
 
@@ -15,5 +15,8 @@ public class ItemImage
 
     [Required]
     public required string Source { get; set; }
+
+    [Required]
+    public int Order { get; set; }
 
 }

@@ -6,11 +6,13 @@ public class AccessoriesDataContext(DbContextOptions options) : DbContext(option
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("abc");
-
         modelBuilder.Entity<AccessoryBase>()
             .HasIndex(x => x.AccessoryBaseId)
             .IsUnique();
+
+        modelBuilder.Entity<Accessory>()
+        .HasIndex(x => x.AccessoryGuid)
+        .IsUnique();
 
         modelBuilder.Entity<Accessory>()
             .HasMany(e => e.Sellers)

@@ -1,6 +1,7 @@
 using ABC.Accessories.AutoMapper;
 using ABC.Accessories.Data;
 using ABC.Accessories.Facade;
+using ABC.Accessories.Helpers;
 using ABC.Accessories.Services;
 using ABC.Accessories.Services.Blob;
 
@@ -29,6 +30,7 @@ builder.Services.AddNpgsql<ComputersDataContext>(pcDbString);
 
 builder.Services.AddAutoMapper(typeof(AccessoriesMapper));
 builder.Services.AddSingleton<IBlobService,BlobService>();
+builder.Services.AddSingleton<IAccessoriesHelper, AccessoriesHelper>();
 builder.Services.AddScoped<IAccessoriesService, AccessoriesService>();
 builder.Services.AddScoped<IAccessoriesFacade, AccessoriesFacade>();
 

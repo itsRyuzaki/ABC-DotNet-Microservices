@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using ABC.Accessories.Models;
 
 namespace ABC.Accessories.DTO.Request;
-
 
 public class AddAccessoryBaseDTO
 {

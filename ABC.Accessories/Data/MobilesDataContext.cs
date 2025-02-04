@@ -6,11 +6,19 @@ public class MobilesDataContext(
                         IConfiguration config
                     ) : AccessoriesDataContext(options)
 {
+
+    private readonly string schemaName = "abc-mobiles";
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasDefaultSchema(schemaName);
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         options.UseNpgsql(
                     config.GetConnectionString("ABC_Mobiles_DB"),
-                    x => x.MigrationsHistoryTable("__EFMigrationsHistory", "abc")
+                    x => x.MigrationsHistoryTable("__EFMigrationsHistory", schemaName)
                 );
     }
 }

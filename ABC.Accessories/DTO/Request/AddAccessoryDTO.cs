@@ -1,16 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using ABC.Accessories.Models;
 
 namespace ABC.Accessories.DTO.Request;
-
-public class ItemImageDTO
-{
-    [Required]
-    public required string AltText { get; set; }
-
-    [Required]
-    public required string Source { get; set; }
-}
 
 public class AddAccessoryDTO
 {
@@ -23,10 +13,6 @@ public class AddAccessoryDTO
     [Required]
     [MinLength(1)]
     public int[] SellerIds { get; set; } = [];
-
-    [Required]
-    [MinLength(1)]
-    public List<ItemImageDTO> Images { get; set; } = [];
 
     [Required]
     public required string Description { get; set; }

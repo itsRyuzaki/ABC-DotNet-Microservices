@@ -1,7 +1,5 @@
 namespace ABC.Accessories.Services.Blob;
 
-using ABC.Accessories.DTO.Response;
-using ABC.Accessories.Enums;
 using Azure.Storage.Blobs;
 
 public class BlobService : IBlobService
@@ -9,24 +7,27 @@ public class BlobService : IBlobService
     private readonly BlobServiceClient _serviceClient;
     private readonly ILogger<BlobService> _logger;
 
-    public BlobService(ILogger<BlobService> logger)
+    public BlobService(ILogger<BlobService> logger, IConfiguration configuration)
     {
         _logger = logger;
 
-        // Connection string for Azurite Blob Storage
-        // string connectionString = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOxKkxp8tV7sKlq8bfa8f3FqFtMgyQ87OmG0Bsz43WfImdDkYZp2P4HNhqcuWzO5z5OisXB2ZaLw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
+        string? connectionString = configuration.GetConnectionString("ABC_Blob");
 
-        string connectionString = "UseDevelopmentStorage=true";
-
-        // Create BlobServiceClient
-        _serviceClient = new(connectionString);
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new Exception("No connection string provided for Blob Service");
+        }
+        else
+        {
+            // Create BlobServiceClient
+            _serviceClient = new(connectionString);
+        }
 
 
     }
 
-    public async Task<ApiResponseDto<string>> Upload(string containerName, string path, IFormFile file)
+    public async Task<bool> Upload(string containerName, string path, IFormFile file)
     {
-
         try
         {
             var containerClient = _serviceClient.GetBlobContainerClient(containerName);
@@ -41,14 +42,13 @@ public class BlobService : IBlobService
             await blobClient.UploadAsync(stream, overwrite: true);
 
             _logger.LogInformation("File uploaded successfully to blob with path: {path}", path);
-            return ApiResponseDto.HandleSuccessResponse("File uploaded successfully to blob");
+            return true;
 
         }
-
         catch (Exception error)
         {
             _logger.LogError("Error occured while uploading file to blob with path: {path}. See error stack below: {error}", path, error);
-            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error occurred while uploading file to blob"]);
+            return false;
         }
 
     }

@@ -13,4 +13,8 @@ public interface IAccessoriesService
 
     public Task<List<Seller>> GetSellersAsync(int[] sellerIds, string type);
 
+    public Task<Accessory?> GetAccessoryFromGuidAsync(string accessoryGuid, string type);
+
+    public Task<ApiResponseDto<string>> AddImagesToAccessoryAsync(List<ItemImage> itemImages, Accessory accessory, string type);
+
 }
