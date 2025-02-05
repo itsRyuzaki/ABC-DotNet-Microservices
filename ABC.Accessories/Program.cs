@@ -2,8 +2,10 @@ using ABC.Accessories.AutoMapper;
 using ABC.Accessories.Data;
 using ABC.Accessories.Facade;
 using ABC.Accessories.Helpers;
+using ABC.Accessories.Models.MongoDb;
 using ABC.Accessories.Services;
 using ABC.Accessories.Services.Blob;
+using ABC.Accessories.Services.MongoDb;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // for db
+
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("ABC-Accessory-MongoDb"));
+
 var mobileDbString = builder.Configuration.GetConnectionString("ABC_Mobiles_DB") ??
                     throw new InvalidOperationException("Connection string 'ABC_Mobiles_DB' not found.");
 
@@ -30,6 +35,7 @@ builder.Services.AddNpgsql<ComputersDataContext>(pcDbString);
 
 builder.Services.AddAutoMapper(typeof(AccessoriesMapper));
 builder.Services.AddSingleton<IBlobService,BlobService>();
+builder.Services.AddSingleton<IMongoDbService, MongoDbService>();
 builder.Services.AddSingleton<IAccessoriesHelper, AccessoriesHelper>();
 builder.Services.AddScoped<IAccessoriesService, AccessoriesService>();
 builder.Services.AddScoped<IAccessoriesFacade, AccessoriesFacade>();

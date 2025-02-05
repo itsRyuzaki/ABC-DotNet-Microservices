@@ -1,0 +1,8 @@
+namespace ABC.Accessories.Models.MongoDb;
+
+public class MongoDbSettings
+{
+    public string ConnectionString { get; set; } = null!;
+
+    public string DatabaseName { get; set; } = null!;
+}

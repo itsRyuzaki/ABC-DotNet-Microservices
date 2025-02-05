@@ -16,9 +16,6 @@ public class UserService
 
     private readonly IMongoCollection<SessionHistory> _sessionCollection = mongoService.GetSessionHistoryCollection();
 
-
-    // public async Task LoginUserAsync(UserLoginDto loginRequest){}
-
     public async Task<ApiResponseDto<string>> InsertUserDataAsync(User userData)
     {
         try

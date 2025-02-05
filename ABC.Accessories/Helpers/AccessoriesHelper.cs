@@ -12,6 +12,11 @@ public partial class AccessoriesHelper(
     [GeneratedRegex(@"[^a-z0-9\-]")]
     private static partial Regex MyRegex();
 
+    private readonly JsonSerializerOptions serializationOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     public string SanitizeBlobName(string fileName)
     {
         int extensionPosition = fileName.LastIndexOf('.');
@@ -36,7 +41,7 @@ public partial class AccessoriesHelper(
 
         try
         {
-            var deserializedJson = await JsonSerializer.DeserializeAsync<T>(stream);
+            var deserializedJson = await JsonSerializer.DeserializeAsync<T>(stream, serializationOptions);
             return ApiResponseDto<T>.HandleSuccessResponse(deserializedJson);
         }
         catch (JsonException error)

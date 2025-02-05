@@ -31,7 +31,7 @@ builder.Services.AddSwaggerGen();
 
 // for db
 builder.Services.Configure<UsersDatabaseSettings>(
-    builder.Configuration.GetSection("ABCUsersDatabase"));
+    builder.Configuration.GetSection("ABC-Users-MongoDb"));
 
 /** 
     Add Services to DI here 

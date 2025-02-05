@@ -1,0 +1,19 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace ABC.Accessories.Models.MongoDb;
+
+public class AccessoryExtras
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
+
+    public required string AccessoryGuid {get; set;}
+
+    public string[] Specifications { get; set; } = [];
+
+    public required string[] InBoxItems { get; set; }
+
+    public required ItemAttributes[] ItemAttributes {get; set;}
+}
