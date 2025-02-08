@@ -4,20 +4,30 @@ using ABC.Accessories.DTO.Response;
 using ABC.Accessories.Models;
 using ABC.Accessories.Enums;
 using Microsoft.EntityFrameworkCore;
+using ABC.Accessories.Services.MongoDb;
+using ABC.Accessories.Models.MongoDb;
+using MongoDB.Driver;
 
 namespace ABC.Accessories.Services;
 public class AccessoriesService : IAccessoriesService
 {
 
     private readonly Dictionary<string, AccessoriesDataContext> _contextMap = [];
+    private readonly Dictionary<string, IMongoCollection<AccessoryExtras>> _accExtrasCollectionMap = [];
+    private readonly Dictionary<string, IMongoCollection<AccessoryBaseExtras>> _baseExtrasCollectionMap = [];
+
     private readonly ILogger _logger;
 
     public AccessoriesService(
                 ComputersDataContext computersDataContext,
                 MobilesDataContext mobilesDataContext,
-                ILogger<AccessoriesService> logger
+                ILogger<AccessoriesService> logger,
+                IMongoDbService mongoDbService
             )
     {
+        _accExtrasCollectionMap = mongoDbService.GetAccExtrasCollectionMap();
+        _baseExtrasCollectionMap = mongoDbService.GetBaseExtrasCollectionMap();
+
         _contextMap.Add(AccessoriesType.Mobile, mobilesDataContext);
         _contextMap.Add(AccessoriesType.Computer, computersDataContext);
         _logger = logger;
@@ -63,6 +73,30 @@ public class AccessoriesService : IAccessoriesService
 
     }
 
+    public async Task<ApiResponseDto<string>> AddAccessoryExtrasAsync(AccessoryExtras accessoryExtras, string type)
+    {
+        try
+        {
+            await _accExtrasCollectionMap[type].InsertOneAsync(accessoryExtras);
+
+            _logger.LogInformation("Saved extra details for Accessory: {name}", accessoryExtras.AccessoryGuid);
+            return ApiResponseDto.HandleSuccessResponse("Accessory Extra Added");
+
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                        "Error while saving extra details for accessory: {name}. See error stack below: \n {error}",
+                        accessoryExtras.AccessoryGuid,
+                        error.ToString()
+                    );
+
+            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving extra details for accessory."]);
+        }
+
+
+    }
+
     public async Task<ApiResponseDto<string>> AddAccessoryBaseAsync(AccessoryBase accessoryBase, string type)
     {
         try
@@ -83,6 +117,30 @@ public class AccessoriesService : IAccessoriesService
                     );
 
             return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving base details for accessory."]);
+        }
+
+
+    }
+
+    public async Task<ApiResponseDto<string>> AddAccessoryBaseExtrasAsync(AccessoryBaseExtras baseExtras, string type)
+    {
+        try
+        {
+            await _baseExtrasCollectionMap[type].InsertOneAsync(baseExtras);
+
+            _logger.LogInformation("Saved extra base details for Accessory: {name}", baseExtras.AccessoryBaseId);
+            return ApiResponseDto.HandleSuccessResponse("Extra Accessory Base Added");
+
+        }
+        catch (Exception error)
+        {
+            _logger.LogError(
+                        "Error while saving extra base details for accessory: {name}. See error stack below: \n {error}",
+                        baseExtras.AccessoryBaseId,
+                        error.ToString()
+                    );
+
+            return ApiResponseDto.HandleErrorResponse((int)ResponseCode.ERROR, ["Error while saving extra base details for accessory."]);
         }
 
 

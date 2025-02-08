@@ -18,4 +18,7 @@ public class AddAccessoryBaseDTO
 
     [Required]
     public required string Brand { get; set; }
+
+    public KeyValuePair<string, string[]>[] MasterData {get; set;} = [];
+
 }

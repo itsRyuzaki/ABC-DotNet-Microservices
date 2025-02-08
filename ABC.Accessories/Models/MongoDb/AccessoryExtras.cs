@@ -15,5 +15,5 @@ public class AccessoryExtras
 
     public required string[] InBoxItems { get; set; }
 
-    public required ItemAttributes[] ItemAttributes {get; set;}
+    public IDictionary<string, string> ItemAttributes {get; set;} = new Dictionary<string, string>();
 }

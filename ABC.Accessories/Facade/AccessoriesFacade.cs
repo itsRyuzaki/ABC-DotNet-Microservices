@@ -4,6 +4,7 @@ using ABC.Accessories.DTO.Response;
 using ABC.Accessories.Enums;
 using ABC.Accessories.Helpers;
 using ABC.Accessories.Models;
+using ABC.Accessories.Models.MongoDb;
 using ABC.Accessories.Services;
 using ABC.Accessories.Services.Blob;
 using AutoMapper;
@@ -45,8 +46,17 @@ public class AccessoriesFacade(
 
             _logger.LogInformation("Saving Accessory Details for accessory: {name}", payload.AccessoryBaseId);
 
-            return await _accessoriesService
+            var accessorySavedResponse = await _accessoriesService
                                  .AddAccessoryAsync(accessoryDetail, payload.AccessoryBaseId, payload.Type);
+
+            if (!accessorySavedResponse.Success)
+                return accessorySavedResponse;
+
+            var extraDetails = _mapper.Map<AccessoryExtras>(payload);
+            extraDetails.AccessoryGuid = accessoryDetail.AccessoryGuid;
+
+            return await _accessoriesService.AddAccessoryExtrasAsync(extraDetails, payload.Type);
+
         }
         else
         {
@@ -61,7 +71,15 @@ public class AccessoriesFacade(
 
         details.AccessoryBaseId = Guid.NewGuid().ToString();
 
-        return await _accessoriesService.AddAccessoryBaseAsync(details, payload.Type);
+        var baseSavedResponse = await _accessoriesService.AddAccessoryBaseAsync(details, payload.Type);
+
+        if (!baseSavedResponse.Success)
+            return baseSavedResponse;
+
+        var extraDetails = _mapper.Map<AccessoryBaseExtras>(payload);
+        extraDetails.AccessoryBaseId = details.AccessoryBaseId;
+
+        return await _accessoriesService.AddAccessoryBaseExtrasAsync(extraDetails, payload.Type);
     }
 
     public async Task<ApiResponseDto<string>> AddSellerDetailsAsync(AddSellerDTO payload)

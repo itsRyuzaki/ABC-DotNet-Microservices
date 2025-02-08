@@ -31,4 +31,6 @@ public class AddAccessoryDTO
     [Required]
     public int AvailableCount { get; set; }
 
+    public IDictionary<string, string> ItemAttributes {get; set;} = new Dictionary<string, string>();
+
 }
