@@ -2,16 +2,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ABC.Accessories.Models;
 
-public class Category
+public class Category : BaseImageDetail
 {
     public int Id { get; set; }
-
-    [Required]
-    public required string Type { get; set; }
 
     [Required]
     public required string Name { get; set; }
 
     [Required]
     public required string Description { get; set; }
+
+    public List<AccessoryBase> AccessoriesBase { get; set; } = [];
+
 }

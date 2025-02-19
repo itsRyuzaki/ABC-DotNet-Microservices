@@ -76,19 +76,16 @@ namespace ABC.Accessories.Migrations.Computers
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("BrandId")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeviceModelId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SubCategory")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -96,6 +93,12 @@ namespace ABC.Accessories.Migrations.Computers
 
                     b.HasIndex("AccessoryBaseId")
                         .IsUnique();
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("DeviceModelId");
 
                     b.ToTable("AccessoryBase", "abc-computers");
                 });
@@ -129,6 +132,10 @@ namespace ABC.Accessories.Migrations.Computers
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -137,13 +144,48 @@ namespace ABC.Accessories.Migrations.Computers
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Type")
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Source")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Category", "abc-computers");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.DeviceModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeviceModel", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Inventory", b =>
@@ -254,6 +296,33 @@ namespace ABC.Accessories.Migrations.Computers
                     b.Navigation("AccessoryBase");
                 });
 
+            modelBuilder.Entity("ABC.Accessories.Models.AccessoryBase", b =>
+                {
+                    b.HasOne("ABC.Accessories.Models.Brand", "Brand")
+                        .WithMany("AccessoriesBase")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ABC.Accessories.Models.Category", "Category")
+                        .WithMany("AccessoriesBase")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ABC.Accessories.Models.DeviceModel", "DeviceModel")
+                        .WithMany("AccessoriesBase")
+                        .HasForeignKey("DeviceModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("DeviceModel");
+                });
+
             modelBuilder.Entity("ABC.Accessories.Models.Inventory", b =>
                 {
                     b.HasOne("ABC.Accessories.Models.Accessory", "Accessory")
@@ -302,6 +371,21 @@ namespace ABC.Accessories.Migrations.Computers
             modelBuilder.Entity("ABC.Accessories.Models.AccessoryBase", b =>
                 {
                     b.Navigation("Accessories");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.Brand", b =>
+                {
+                    b.Navigation("AccessoriesBase");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.Category", b =>
+                {
+                    b.Navigation("AccessoriesBase");
+                });
+
+            modelBuilder.Entity("ABC.Accessories.Models.DeviceModel", b =>
+                {
+                    b.Navigation("AccessoriesBase");
                 });
 #pragma warning restore 612, 618
         }

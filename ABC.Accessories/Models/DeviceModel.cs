@@ -2,14 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ABC.Accessories.Models;
 
-public class Brand {
-    public int Id {get; set;}
+public class DeviceModel : BaseImageDetail
+{
+    public int Id { get; set; }
 
     [Required]
-    public required string Name {get; set;}
+    public required string Name { get; set; }
 
     [Required]
-    public required string OfficialSite {get; set;}
+    public required string Description { get; set; }
 
     public List<AccessoryBase> AccessoriesBase { get; set; } = [];
 

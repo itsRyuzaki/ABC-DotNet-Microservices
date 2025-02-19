@@ -3,21 +3,24 @@ using System;
 using ABC.Accessories.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ABC.Accessories.Migrations.Mobiles
+namespace ABC.Accessories.Migrations.Computers
 {
-    [DbContext(typeof(MobilesDataContext))]
-    partial class MobilesDataContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ComputersDataContext))]
+    [Migration("20250211133607_Update_CategoryModelBrand")]
+    partial class Update_CategoryModelBrand
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("abc-mobiles")
+                .HasDefaultSchema("abc-computers")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -61,7 +64,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     b.HasIndex("AccessoryGuid")
                         .IsUnique();
 
-                    b.ToTable("Accessories", "abc-mobiles");
+                    b.ToTable("Accessories", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.AccessoryBase", b =>
@@ -100,7 +103,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasIndex("DeviceModelId");
 
-                    b.ToTable("AccessoryBase", "abc-mobiles");
+                    b.ToTable("AccessoryBase", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Brand", b =>
@@ -121,7 +124,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", "abc-mobiles");
+                    b.ToTable("Brands", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Category", b =>
@@ -153,7 +156,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category", "abc-mobiles");
+                    b.ToTable("Category", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.DeviceModel", b =>
@@ -185,7 +188,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeviceModel", "abc-mobiles");
+                    b.ToTable("DeviceModel", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Inventory", b =>
@@ -210,7 +213,7 @@ namespace ABC.Accessories.Migrations.Mobiles
                     b.HasIndex("AccessoryId")
                         .IsUnique();
 
-                    b.ToTable("Inventory", "abc-mobiles");
+                    b.ToTable("Inventory", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.ItemImage", b =>
@@ -239,7 +242,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasIndex("AccessoryId");
 
-                    b.ToTable("ItemImages", "abc-mobiles");
+                    b.ToTable("ItemImages", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Seller", b =>
@@ -267,7 +270,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sellers", "abc-mobiles");
+                    b.ToTable("Sellers", "abc-computers");
                 });
 
             modelBuilder.Entity("AccessorySellerXREF", b =>
@@ -282,7 +285,7 @@ namespace ABC.Accessories.Migrations.Mobiles
 
                     b.HasIndex("SellersId");
 
-                    b.ToTable("AccessorySellerXREF", "abc-mobiles");
+                    b.ToTable("AccessorySellerXREF", "abc-computers");
                 });
 
             modelBuilder.Entity("ABC.Accessories.Models.Accessory", b =>

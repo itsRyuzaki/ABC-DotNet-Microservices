@@ -5,21 +5,23 @@ namespace ABC.Accessories.Models;
 public class AccessoryBase
 {
     public int Id { get; set; }
-
-    [Required]
-    public required string AccessoryBaseId { get; set; }
-
-    public List<Accessory> Accessories { get; set; } = [];
-
+    
     [Required]
     public required string Name { get; set; }
 
     [Required]
-    public required string Category { get; set; }
+    public required string AccessoryBaseId { get; set; }
+    public List<Accessory> Accessories { get; set; } = [];
 
     [Required]
-    public required string SubCategory { get; set; }
+    public int CategoryId { get; set; }
+    public Category Category { get; set; } = null!;
 
     [Required]
-    public required string Brand { get; set; }
+    public int DeviceModelId { get; set; }
+    public DeviceModel DeviceModel { get; set; } = null!;
+
+    [Required]
+    public int BrandId { get; set; }
+    public Brand Brand { get; set; } = null!;
 }

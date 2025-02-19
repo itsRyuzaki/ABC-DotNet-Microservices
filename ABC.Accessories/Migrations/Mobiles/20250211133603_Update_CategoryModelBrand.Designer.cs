@@ -3,6 +3,7 @@ using System;
 using ABC.Accessories.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ABC.Accessories.Migrations.Mobiles
 {
     [DbContext(typeof(MobilesDataContext))]
-    partial class MobilesDataContextModelSnapshot : ModelSnapshot
+    [Migration("20250211133603_Update_CategoryModelBrand")]
+    partial class Update_CategoryModelBrand
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

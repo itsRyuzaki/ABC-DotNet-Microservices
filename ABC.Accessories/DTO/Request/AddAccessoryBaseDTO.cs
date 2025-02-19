@@ -11,13 +11,13 @@ public class AddAccessoryBaseDTO
     public required string Name { get; set; }
 
     [Required]
-    public required string Category { get; set; }
+    public int CategoryId { get; set; }
 
     [Required]
-    public required string SubCategory { get; set; }
+    public int DeviceModelId { get; set; }
 
     [Required]
-    public required string Brand { get; set; }
+    public int BrandId { get; set; }
 
     public KeyValuePair<string, string[]>[] MasterData {get; set;} = [];
 
